@@ -130,6 +130,7 @@ namespace FileEncryptor.WPF.Services
                         // очистка состояния операции
                         Cancel.ThrowIfCancellationRequested();
                     }
+                    Thread.Sleep(10);
                 }
                 while (readed > 0);
 
