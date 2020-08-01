@@ -98,14 +98,15 @@ namespace FileEncryptor.WPF.ViewModels
             var progress = new Progress<double>(percent => ProgressValue = percent);
 
             _ProcessCancellation = new CancellationTokenSource();
+            var cancel = _ProcessCancellation.Token;
 
             ((Command)EncryptCommand).Executable = false;
             ((Command)DecryptCommand).Executable = false;
             try
             {
-                await _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: _ProcessCancellation.Token);
+                await _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: cancel);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e) when(e.CancellationToken == cancel)
             {
             }
             finally
@@ -146,10 +147,11 @@ namespace FileEncryptor.WPF.ViewModels
 
             var progress = new Progress<double>(percent => ProgressValue = percent);
             _ProcessCancellation = new CancellationTokenSource();
+            var cancel = _ProcessCancellation.Token;
 
             ((Command)EncryptCommand).Executable = false;
             ((Command)DecryptCommand).Executable = false;
-            var decryption_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: _ProcessCancellation.Token);
+            var decryption_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: cancel);
             // дополнительный код, выполняемый параллельно процессу дешифрования
 
             var success = false;
@@ -157,7 +159,7 @@ namespace FileEncryptor.WPF.ViewModels
             {
                 success = await decryption_task;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e) when (e.CancellationToken == cancel)
             {
 
             }
