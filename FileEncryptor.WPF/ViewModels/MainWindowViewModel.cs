@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FileEncryptor.WPF.Infrastructure.Commands;
@@ -16,6 +17,8 @@ namespace FileEncryptor.WPF.ViewModels
 
         private readonly IUserDialog _UserDialog;
         private readonly IEncryptor _Encryptor;
+
+        private CancellationTokenSource _ProcessCancellation;
 
         #region Title : string - Заголовок окна
 
@@ -44,6 +47,16 @@ namespace FileEncryptor.WPF.ViewModels
 
         /// <summary>Выбранный файл</summary>
         public FileInfo SelectedFile { get => _SelectedFile; set => Set(ref _SelectedFile, value); }
+
+        #endregion
+
+        #region ProgressValue : double - Значение прогресса
+
+        /// <summary>Значение прогресса</summary>
+        private double _ProgressValue;
+
+        /// <summary>Значение прогресса</summary>
+        public double ProgressValue { get => _ProgressValue; set => Set(ref _ProgressValue, value); }
 
         #endregion
 
@@ -82,14 +95,23 @@ namespace FileEncryptor.WPF.ViewModels
 
             var timer = Stopwatch.StartNew();
 
+            var progress = new Progress<double>(percent => ProgressValue = percent);
+
+            _ProcessCancellation = new CancellationTokenSource();
+
             ((Command)EncryptCommand).Executable = false;
             ((Command)DecryptCommand).Executable = false;
             try
             {
-                await _Encryptor.EncryptAsync(file.FullName, destination_path, Password);
+                await _Encryptor.EncryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: _ProcessCancellation.Token);
             }
-            catch (OperationCanceledException )
+            catch (OperationCanceledException)
             {
+            }
+            finally
+            {
+                _ProcessCancellation.Dispose();
+                _ProcessCancellation = null;
             }
             ((Command)EncryptCommand).Executable = true;
             ((Command)DecryptCommand).Executable = true;
@@ -97,7 +119,7 @@ namespace FileEncryptor.WPF.ViewModels
 
             timer.Stop();
 
-            _UserDialog.Information("Шифрование", $"Шифрование файла успешно завершено за {timer.Elapsed.TotalSeconds:0.##} с");
+            //_UserDialog.Information("Шифрование", $"Шифрование файла успешно завершено за {timer.Elapsed.TotalSeconds:0.##} с");
         }
 
         #endregion
@@ -122,9 +144,12 @@ namespace FileEncryptor.WPF.ViewModels
 
             var timer = Stopwatch.StartNew();
 
+            var progress = new Progress<double>(percent => ProgressValue = percent);
+            _ProcessCancellation = new CancellationTokenSource();
+
             ((Command)EncryptCommand).Executable = false;
             ((Command)DecryptCommand).Executable = false;
-            var decryption_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password);
+            var decryption_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password, Progress: progress, Cancel: _ProcessCancellation.Token);
             // дополнительный код, выполняемый параллельно процессу дешифрования
 
             var success = false;
@@ -135,6 +160,11 @@ namespace FileEncryptor.WPF.ViewModels
             catch (OperationCanceledException)
             {
 
+            }
+            finally
+            {
+                _ProcessCancellation.Dispose();
+                _ProcessCancellation = null;
             }
 
             ((Command)EncryptCommand).Executable = true;
@@ -147,6 +177,22 @@ namespace FileEncryptor.WPF.ViewModels
             else
                 _UserDialog.Warning("Шифрование", "Ошибка при дешифровке файла: указан неверный пароль.");
         }
+
+        #endregion
+
+        #region Command CancelCommand - Отмена операции
+
+        /// <summary>Отмена операции</summary>
+        private ICommand _CancelCommand;
+
+        /// <summary>Отмена операции</summary>
+        public ICommand CancelCommand => _CancelCommand ??= new LambdaCommand(OnCancelCommandExecuted, CanCancelCommandExecute);
+
+        /// <summary>Проверка возможности выполнения - Отмена операции</summary>
+        private bool CanCancelCommandExecute() => _ProcessCancellation != null && !_ProcessCancellation.IsCancellationRequested;
+
+        /// <summary>Логика выполнения - Отмена операции</summary>
+        private void OnCancelCommandExecuted() => _ProcessCancellation.Cancel();
 
         #endregion
 
