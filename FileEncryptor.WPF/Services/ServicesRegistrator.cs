@@ -7,6 +7,7 @@ namespace FileEncryptor.WPF.Services
     {
         public static IServiceCollection AddServices(this IServiceCollection services) => services
            .AddTransient<IUserDialog, UserDialogService>()
+           .AddTransient<IEncryptor, Rfc2898Encryptor>()
         ;
     }
 }
