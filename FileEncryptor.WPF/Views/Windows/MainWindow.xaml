@@ -51,9 +51,16 @@
 
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Файл:"/>
             <DockPanel Grid.Column="1" Grid.Row="1">
-                <Button DockPanel.Dock="Right" Content="Выбор" Padding="10,0"/>
-                <TextBox IsReadOnly="True" BorderThickness="0"/>
+                <Button DockPanel.Dock="Right" Content="Выбор" Padding="10,0" Command="{Binding SelectFileCommand}"/>
+                <TextBox IsReadOnly="True" BorderThickness="0" 
+                         Text="{Binding SelectedFile.Name, Mode=OneWay}" 
+                         ToolTip="{Binding SelectedFile.FullName}"/>
             </DockPanel>
+
+            <TextBlock Grid.Column="0" Grid.Row="2" Text="Размер"/>
+            <TextBox Grid.Column="1" Grid.Row="2" IsReadOnly="True"
+                     Text="{Binding SelectedFile.Length, Mode=OneWay}"
+                     BorderThickness="0"/>
         </Grid>
     </DockPanel>
 </Window>
