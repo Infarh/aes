@@ -1,7 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using FileEncryptor.WPF.Infrastructure.Commands;
+using FileEncryptor.WPF.Infrastructure.Commands.Base;
 using FileEncryptor.WPF.Services.Interfaces;
 using FileEncryptor.WPF.ViewModels.Base;
 
@@ -69,7 +72,7 @@ namespace FileEncryptor.WPF.ViewModels
 
         private bool CanEncryptCommandExecute(object p) => (p is FileInfo file && file.Exists || SelectedFile != null) && !string.IsNullOrWhiteSpace(Password);
 
-        private void OnEncryptCommandExecuted(object p)
+        private async void OnEncryptCommandExecuted(object p)
         {
             var file = p as FileInfo ?? SelectedFile;
             if (file is null) return;
@@ -78,7 +81,20 @@ namespace FileEncryptor.WPF.ViewModels
             if (!_UserDialog.SaveFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
 
             var timer = Stopwatch.StartNew();
-            _Encryptor.Encrypt(file.FullName, destination_path, Password);
+
+            ((Command)EncryptCommand).Executable = false;
+            ((Command)DecryptCommand).Executable = false;
+            try
+            {
+                await _Encryptor.EncryptAsync(file.FullName, destination_path, Password);
+            }
+            catch (OperationCanceledException )
+            {
+            }
+            ((Command)EncryptCommand).Executable = true;
+            ((Command)DecryptCommand).Executable = true;
+
+
             timer.Stop();
 
             _UserDialog.Information("Шифрование", $"Шифрование файла успешно завершено за {timer.Elapsed.TotalSeconds:0.##} с");
@@ -94,18 +110,36 @@ namespace FileEncryptor.WPF.ViewModels
 
         private bool CanDecryptCommandExecute(object p) => (p is FileInfo file && file.Exists || SelectedFile != null) && !string.IsNullOrWhiteSpace(Password);
 
-        private void OnDecryptCommandExecuted(object p)
+        private async void OnDecryptCommandExecuted(object p)
         {
             var file = p as FileInfo ?? SelectedFile;
             if (file is null) return;
 
-            var default_file_name = file.FullName.EndsWith(__EncryptedFileSuffix) 
+            var default_file_name = file.FullName.EndsWith(__EncryptedFileSuffix)
                 ? file.FullName.Substring(0, file.FullName.Length - __EncryptedFileSuffix.Length)
                 : file.FullName;
             if (!_UserDialog.SaveFile("Выбор файл для сохранения", out var destination_path, default_file_name)) return;
 
             var timer = Stopwatch.StartNew();
-            var success = _Encryptor.Decrypt(file.FullName, destination_path, Password);
+
+            ((Command)EncryptCommand).Executable = false;
+            ((Command)DecryptCommand).Executable = false;
+            var decryption_task = _Encryptor.DecryptAsync(file.FullName, destination_path, Password);
+            // дополнительный код, выполняемый параллельно процессу дешифрования
+
+            var success = false;
+            try
+            {
+                success = await decryption_task;
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+
+            ((Command)EncryptCommand).Executable = true;
+            ((Command)DecryptCommand).Executable = true;
+
             timer.Stop();
 
             if (success)
