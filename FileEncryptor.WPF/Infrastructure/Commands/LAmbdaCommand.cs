@@ -3,7 +3,7 @@ using FileEncryptor.WPF.Infrastructure.Commands.Base;
 
 namespace FileEncryptor.WPF.Infrastructure.Commands
 {
-    class LambdaCommand : Command
+    internal class LambdaCommand : Command
     {
         private readonly Action<object> _Execute;
         private readonly Func<object, bool> _CanExecute;
