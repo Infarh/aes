@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FileEncryptor.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "test.txt test.txt.aes"
+    }
+  }
+}

@@ -8,4 +8,11 @@
     <RootNamespace>FileEncryptor</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Using Include="System"/>
+    <Using Include="System.Text"/>
+    <Using Include="System.IO"/>
+    <Using Include="System.Security.Cryptography"/>
+  </ItemGroup>
+
 </Project>
