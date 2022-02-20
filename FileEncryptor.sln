@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30320.27
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileEncryptor.WPF", "FileEncryptor.WPF\FileEncryptor.WPF.csproj", "{F09B66F0-CA80-4128-B547-C226646583E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileEncryptor.WPF", "FileEncryptor.WPF\FileEncryptor.WPF.csproj", "{F09B66F0-CA80-4128-B547-C226646583E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileEncryptor.Console", "FileEncryptor.Console\FileEncryptor.Console.csproj", "{78F2CE10-AC31-45D2-BBAA-703D8FC25B86}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F09B66F0-CA80-4128-B547-C226646583E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F09B66F0-CA80-4128-B547-C226646583E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F09B66F0-CA80-4128-B547-C226646583E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78F2CE10-AC31-45D2-BBAA-703D8FC25B86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78F2CE10-AC31-45D2-BBAA-703D8FC25B86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78F2CE10-AC31-45D2-BBAA-703D8FC25B86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78F2CE10-AC31-45D2-BBAA-703D8FC25B86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
