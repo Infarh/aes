@@ -22,9 +22,11 @@ const int buffer_size = 1024 * 1024;
 
 static void Encrypt(FileInfo file)
 {
-    Console.WriteLine("Шифрую файл {0}", file);
+    Console.WriteLine("Шифрую файл");
+    Console.WriteLine(file.FullName);
 
     var encoded_file = new FileInfo($"{file.FullName}{encoded_ext}");
+    Console.WriteLine(encoded_file.FullName);
 
     var file_name = Path.GetFileNameWithoutExtension(file.Name);
 
@@ -41,10 +43,12 @@ static void Encrypt(FileInfo file)
 
 static void Decrypt(FileInfo file)
 {
-    Console.WriteLine("Дешифрую файл {0}", file);
+    Console.WriteLine("Дешифрую файл");
+    Console.WriteLine(file.FullName);
 
     var source_file_full_name = Path.GetFileNameWithoutExtension(file.FullName);
     var source_file = new FileInfo(source_file_full_name);
+    Console.WriteLine(source_file.FullName);
 
     var password = Path.GetFileNameWithoutExtension(source_file_full_name);
     using var aes = CreateAES(password);
