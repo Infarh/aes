@@ -18,10 +18,13 @@ namespace FileEncryptor.WPF.Services
             0x4d, 0x08, 0x22, 0x3c
         };
 
+        private static byte[] CreateRandomSalt(int length = 16) => RandomNumberGenerator.GetBytes(Math.Max(1, length));
+
+
         private static ICryptoTransform GetEncryptor(string password, byte[] Slat = null)
         {
             var pdb = new Rfc2898DeriveBytes(password, Slat ?? __Salt);
-            var algorithm = Rijndael.Create();
+            var algorithm = Aes.Create();
             algorithm.Key = pdb.GetBytes(32);
             algorithm.IV = pdb.GetBytes(16);
             return algorithm.CreateEncryptor();
@@ -30,7 +33,7 @@ namespace FileEncryptor.WPF.Services
         private static ICryptoTransform GetDecryptor(string password, byte[] Slat = null)
         {
             var pdb = new Rfc2898DeriveBytes(password, Slat ?? __Salt);
-            var algorithm = Rijndael.Create();
+            var algorithm = Aes.Create();
             algorithm.Key = pdb.GetBytes(32);
             algorithm.IV = pdb.GetBytes(16);
             return algorithm.CreateDecryptor();
