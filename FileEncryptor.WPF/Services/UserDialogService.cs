@@ -35,7 +35,8 @@ namespace FileEncryptor.WPF.Services
             var file_dialog = new OpenFileDialog
             {
                 Title = Title,
-                Filter = Filter
+                Filter = Filter,
+                Multiselect = true
             };
 
             if (file_dialog.ShowDialog() != true)
