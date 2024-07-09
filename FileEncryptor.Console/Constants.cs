@@ -1,6 +1,6 @@
 ﻿namespace FileEncryptor;
 
-public class Constants
+internal static class Constants
 {
     public const string EncodedExt = ".aes";
 
@@ -21,5 +21,4 @@ public class Constants
     //];
 
     public static string CurrentPath { get; } = AppContext.BaseDirectory;
-
 }
