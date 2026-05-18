@@ -7,43 +7,43 @@ internal static class FileInfoEx
             ? path[Constants.CurrentPath.Length..].TrimStart('/', '\\')
             : path;
 
-    public static void Encrypt(this FileInfo SourceFile, Aes aes)
+    public static void Encrypt(this FileInfo sourceFile, Aes aes)
     {
-        var encrypted_file = new FileInfo($"{SourceFile.FullName}{Constants.EncodedExt}");
+        var encryptedFile = new FileInfo($"{sourceFile.FullName}{Constants.EncodedExt}");
 
-        Console.WriteLine($"Encrypting: {CheckRelatedPath(SourceFile.FullName)} {SourceFile.Length}B");
-        Console.WriteLine($"        to: {CheckRelatedPath(encrypted_file.FullName)}");
+        Console.WriteLine($"Encrypting: {CheckRelatedPath(sourceFile.FullName)} {sourceFile.Length}B");
+        Console.WriteLine($"        to: {CheckRelatedPath(encryptedFile.FullName)}");
 
-        using var src_stream = SourceFile.OpenRead();
-        using var dst_stream = encrypted_file.Create();
+        using var srcStream = sourceFile.OpenRead();
+        using var dstStream = encryptedFile.Create();
+        using var cryptStream = aes.GetEncryptionStream(dstStream);
 
-        using (var crypt_stream = aes.GetEncryptionStream(dst_stream))
-            src_stream.CopyToStream(crypt_stream, SourceFile.Length);
+        srcStream.CopyToStream(cryptStream, sourceFile.Length);
 
         Console.WriteLine("Encrypted.");
     }
 
-    public static void Decrypt(this FileInfo EncryptedFile, Aes aes)
+    public static void Decrypt(this FileInfo encryptedFile, Aes aes)
     {
-        var source_file_full_name = Path.GetFileNameWithoutExtension(EncryptedFile.FullName);
-        var dest_file = new FileInfo(source_file_full_name);
+        var sourceFileFullName = Path.GetFileNameWithoutExtension(encryptedFile.FullName);
+        var destFile = new FileInfo(sourceFileFullName);
 
-        Console.WriteLine($"Decrypting: {CheckRelatedPath(EncryptedFile.FullName)}");
-        Console.WriteLine($"        to: {CheckRelatedPath(dest_file.FullName)}");
+        Console.WriteLine($"Decrypting: {CheckRelatedPath(encryptedFile.FullName)}");
+        Console.WriteLine($"        to: {CheckRelatedPath(destFile.FullName)}");
 
         try
         {
-            using var src_stream = EncryptedFile.OpenRead();
-            using var dst_stream = dest_file.Create();
+            using var srcStream = encryptedFile.OpenRead();
+            using var dstStream = destFile.Create();
+            using var cryptStream = aes.GetDecryptionStream(srcStream);
 
-            using (var crypt_stream = aes.GetDecryptionStream(src_stream))
-                crypt_stream.CopyToStream(dst_stream, EncryptedFile.Length);
+            cryptStream.CopyToStream(dstStream, encryptedFile.Length);
 
             Console.WriteLine("Decrypted.");
         }
         catch (CryptographicException)
         {
-            dest_file.Delete();
+            destFile.Delete();
             Console.WriteLine();
             Console.WriteLine("File name error");
         }
