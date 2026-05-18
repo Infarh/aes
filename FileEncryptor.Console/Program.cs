@@ -31,14 +31,14 @@ static Aes CreateAes(string pass)
 {
     var aes = Aes.Create();
 
-    var keyAndIv = Rfc2898DeriveBytes.Pbkdf2(
+    var key_and_iv = Rfc2898DeriveBytes.Pbkdf2(
         pass,
         Constants.Salt,
         13,
         HashAlgorithmName.SHA512,
         48);
 
-    aes.Key = keyAndIv[..32];
-    aes.IV = keyAndIv[32..];
+    aes.Key = key_and_iv[..32];
+    aes.IV = key_and_iv[32..];
     return aes;
 }
