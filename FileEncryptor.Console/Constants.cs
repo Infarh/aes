@@ -1,9 +1,13 @@
 ﻿namespace FileEncryptor;
 
+/// <summary>Содержит константы и общие значения приложения</summary>
 internal static class Constants
 {
+    /// <summary>Определяет расширение зашифрованного файла</summary>
     public const string EncodedExt = ".aes";
 
+    /// <summary>Формирует соль фиксированной длины для вывода ключа</summary>
+    /// <returns>Массив байт соли длиной 16</returns>
     private static byte[] GetSalt()
     {
         var assemblyName = Path.GetFileNameWithoutExtension(Environment.ProcessPath) ?? string.Empty;
@@ -18,6 +22,7 @@ internal static class Constants
         return salt[..16];
     }
 
+    /// <summary>Хранит соль для алгоритма PBKDF2</summary>
     public static readonly byte[] Salt = GetSalt();
     //[
     //    0x26, 0xdc, 0xff, 0x00,
@@ -26,5 +31,6 @@ internal static class Constants
     //    0x4d, 0x08, 0x22, 0x3c,
     //];
 
+    /// <summary>Возвращает базовый путь запуска приложения</summary>
     public static string CurrentPath { get; } = AppContext.BaseDirectory;
 }

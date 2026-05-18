@@ -2,10 +2,16 @@
 
 namespace FileEncryptor;
 
+/// <summary>Содержит расширения для копирования потоков с отображением прогресса</summary>
 internal static class StreamEx
 {
+    /// <summary>Определяет размер буфера для поблочного копирования</summary>
     private const int __BufferSize = 1024 * 1024;
 
+    /// <summary>Копирует содержимое одного потока в другой с выводом процента выполнения</summary>
+    /// <param name="Src">Исходный поток для чтения</param>
+    /// <param name="Dest">Целевой поток для записи</param>
+    /// <param name="TotalLength">Общий ожидаемый размер в байтах</param>
     public static void CopyToStream(this Stream Src, Stream Dest, long TotalLength)
     {
         var buffer_array = ArrayPool<byte>.Shared.Rent(__BufferSize);
