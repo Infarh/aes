@@ -6,30 +6,26 @@ internal static class Constants
     /// <summary>Определяет расширение зашифрованного файла</summary>
     public const string EncodedExt = ".aes";
 
-    /// <summary>Формирует соль фиксированной длины для вывода ключа</summary>
-    /// <returns>Массив байт соли длиной 16</returns>
-    private static byte[] GetSalt()
-    {
-        var assemblyName = Path.GetFileNameWithoutExtension(Environment.ProcessPath) ?? string.Empty;
-        var assemblyNameBytes = Encoding.UTF8.GetBytes(assemblyName);
-        byte[] salt = [
-            .. assemblyNameBytes,
-            0x26, 0xdc, 0xff, 0x00,
-            0xad, 0xed, 0x7a, 0xee,
-            0xc5, 0xfe, 0x07, 0xaf,
-            0x4d, 0x08, 0x22, 0x3c,
-        ];
-        return salt[..16];
-    }
+    /// <summary>Определяет размер соли для PBKDF2 в байтах</summary>
+    public const int SaltSize = 16;
 
-    /// <summary>Хранит соль для алгоритма PBKDF2</summary>
-    public static readonly byte[] Salt = GetSalt();
-    //[
-    //    0x26, 0xdc, 0xff, 0x00,
-    //    0xad, 0xed, 0x7a, 0xee,
-    //    0xc5, 0xfe, 0x07, 0xaf,
-    //    0x4d, 0x08, 0x22, 0x3c,
-    //];
+    /// <summary>Определяет размер HMAC-SHA256 тега в байтах</summary>
+    public const int HmacSize = 32;
+
+    /// <summary>Определяет длину ключа AES-256 в байтах</summary>
+    public const int AesKeySize = 32;
+
+    /// <summary>Определяет длину IV для AES-CBC в байтах</summary>
+    public const int AesIvSize = 16;
+
+    /// <summary>Определяет количество итераций PBKDF2</summary>
+    public const int Pbkdf2Iterations = 210000;
+
+    /// <summary>Содержит сигнатуру формата зашифрованного файла</summary>
+    public static readonly byte[] FormatMagic = Encoding.ASCII.GetBytes("AES1");
+
+    /// <summary>Возвращает размер заголовка зашифрованного файла в байтах</summary>
+    public static int HeaderSize { get; } = FormatMagic.Length + SaltSize;
 
     /// <summary>Возвращает базовый путь запуска приложения</summary>
     public static string CurrentPath { get; } = AppContext.BaseDirectory;

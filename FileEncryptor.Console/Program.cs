@@ -1,56 +1,51 @@
 ﻿using FileEncryptor;
 
-/// <summary>Определяет точку входа консольного приложения</summary>
-internal static class Program
+if (args is [])
 {
-    /// <summary>Запускает обработку переданных файлов</summary>
-    /// <param name="args">Список путей к файлам</param>
-    /// <returns>Код завершения процесса</returns>
-    private static int Main(string[] args)
+    Console.WriteLine("No files to processing");
+    return 0;
+}
+
+var has_errors = false;
+foreach (var file_name in args)
+{
+    var file = new FileInfo(file_name);
+    if (!file.Exists)
     {
-        if (args is [])
-        {
-            Console.WriteLine("No files to processing");
-            return 0;
-        }
-
-        foreach (var file in args.Select(fileName => new FileInfo(fileName)).Where(f => f.Exists))
-        {
-            var ext = file.Extension;
-
-            if (string.Equals(ext, Constants.EncodedExt, StringComparison.OrdinalIgnoreCase))
-            {
-                var password = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file.Name));
-                using var aes = CreateAes(password);
-                file.Decrypt(aes);
-            }
-            else
-            {
-                var password = Path.GetFileNameWithoutExtension(file.Name);
-                using var aes = CreateAes(password);
-                file.Encrypt(aes);
-            }
-        }
-
-        return 0;
+        Console.Error.WriteLine($"File not found: {file_name}");
+        has_errors = true;
+        continue;
     }
 
-    /// <summary>Создает и инициализирует экземпляр AES на основе строки пароля</summary>
-    /// <param name="pass">Строка для вывода ключа и вектора инициализации</param>
-    /// <returns>Настроенный экземпляр AES</returns>
-    private static Aes CreateAes(string pass)
+    try
     {
-        var aes = Aes.Create();
-
-        var key_and_iv = Rfc2898DeriveBytes.Pbkdf2(
-            pass,
-            Constants.Salt,
-            13,
-            HashAlgorithmName.SHA512,
-            48);
-
-        aes.Key = key_and_iv[..32];
-        aes.IV = key_and_iv[32..];
-        return aes;
+        var ext = file.Extension;
+        if (string.Equals(ext, Constants.EncodedExt, StringComparison.OrdinalIgnoreCase))
+        {
+            var password = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file.Name));
+            file.Decrypt(password);
+        }
+        else
+        {
+            var password = Path.GetFileNameWithoutExtension(file.Name);
+            file.Encrypt(password);
+        }
+    }
+    catch (InvalidDataException error)
+    {
+        has_errors = true;
+        Console.Error.WriteLine($"Format error for '{file.Name}': {error.Message}");
+    }
+    catch (CryptographicException ex)
+    {
+        has_errors = true;
+        Console.Error.WriteLine($"Cryptographic error for '{file.Name}': {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        has_errors = true;
+        Console.Error.WriteLine($"Processing error for '{file.Name}': {ex.Message}");
     }
 }
+
+return has_errors ? 1 : 0;

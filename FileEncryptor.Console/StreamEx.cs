@@ -31,7 +31,7 @@ internal static class StreamEx
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(buffer_array);
+            ArrayPool<byte>.Shared.Return(buffer_array, clearArray: true);
         }
         Console.WriteLine();
     }
